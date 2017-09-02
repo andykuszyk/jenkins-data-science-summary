@@ -11,10 +11,10 @@ def job(args):
     section = report.add_section()
     tabs = section.add_tabs()
     for i in range(0, len(args.tabs)):
-        tab = args.tabs[i]
+        tab_contents = args.tabs[i]
         name = 'tab{}'.format(i + 1) if len(args.names) <= i else args.names[i]
-        report += '<tab name="{}">'.format(name)
-        for files in [glob.glob(f) for f in tab]:
+        tab = tabs.add_tab(name)
+        for files in [glob.glob(f) for f in tab_contents]:
             for file in files:
                 file_name = os.path.splitext(os.path.split(file)[-1])[0]
                 file_ext = os.path.splitext(os.path.split(file)[-1])[1].lower()
@@ -22,15 +22,11 @@ def job(args):
                     with open(file, 'r') as json_file:
                         contents = json.loads(json_file.read())
                     for key in contents:
-                        report += '<field name="{}">{}</field>'.format(key, contents[key])
+                        tab.add_field(key, contents[key])
                 elif file_ext in ['.png', '.jpeg', '.jpg']:
-                    report += '<field name="{}">'.format(file_name)
-                    report += '<![CDATA[<img src="{}"/>]]>'.format(file)
-                    report += '</field>'
-        report += '</tab>'
-    report += '</tabs></section>'
+                    tab.add_field(file_name, '<![CDATA[<img src="{}"/>]]>'.format(file))
     with open(os.path.join(args.output, 'summary.xml'), 'w') as file:
-        file.write(report)
+        file.write(report.generate())
 
 
 def jobs(args):

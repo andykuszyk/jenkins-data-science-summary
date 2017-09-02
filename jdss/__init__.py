@@ -41,8 +41,43 @@ class SummaryReportNodeBase(SummaryReportLeafBase):
 class SummaryReportSection(SummaryReportNodeBase):
     def __init__(self):
         super().__init__()
-        self._start += '<section name="" fontcolor="">'
-        self._end += '</section>'
+        self._start.append('<section name="" fontcolor="">')
+        self._end.append('</section>')
+
+    def add_tabs(self):
+        tabs = SummaryReportTabs()
+        self._children.append(tabs)
+        return tabs
+
+
+class SummaryReportTabs(SummaryReportNodeBase):
+    def __init__(self):
+        super().__init__()
+        self._start.append('<tabs>')
+        self._end.append('</tabs>')
+
+    def add_tab(self, name):
+        tab = SummaryReportTab(name)
+        self._children.append(tab)
+        return tab
+
+
+class SummaryReportTab(SummaryReportNodeBase):
+    def __init__(self, name):
+        super().__init__()
+        self._start.append('<tab name="{}">'.format(name))
+        self._end.append('</tab>')
+
+    def add_field(self, name, value):
+        field = SummaryReportField(name, value)
+        self._children.append(field)
+        return field
+
+class SummaryReportField(SummaryReportLeafBase):
+    def __init__(self, name, value):
+        super().__init__()
+        self._start.append('<field name="{}">{}'.format(name, value))
+        self._end.append('</field>')
 
 
 class SummaryReport(SummaryReportNodeBase):
