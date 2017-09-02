@@ -32,3 +32,15 @@ class test_SummaryReport(TestCase):
         tab.add_field('spam', 'eggs')
         xml = report.generate()
         self.assertEqual(xml, '<section name="" fontcolor=""><tabs><tab name="foo"><field name="spam">eggs</field></tab></tabs></section>')
+
+    def test_table(self):
+        report = SummaryReport()
+        section = report.add_section()
+        table = section.add_table()
+        row = table.add_row()
+        row.add_cell('foo', 'bar')
+        xml = report.generate()
+        self.assertEqual(
+            xml,
+            '<section name="" fontcolor=""><table sorttable="yes"><tr><td value="foo" align="center" href="bar"/></tr></table></section>'
+        )

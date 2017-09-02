@@ -25,14 +25,49 @@ def job(args):
                         tab.add_field(key, contents[key])
                 elif file_ext in ['.png', '.jpeg', '.jpg']:
                     tab.add_field(file_name, '<![CDATA[<img src="{}"/>]]>'.format(file))
-    with open(os.path.join(args.output, 'summary.xml'), 'w') as file:
-        file.write(report.generate())
+    report.write(args.output)
 
 
 def jobs(args):
     response = requests.get('{}lastBuild/buildNumber'.format(args.url))
+    if response.status_code != 200:
+        raise Exception('Not ok response received for latest build number. Check the url and credentials')
+    last_build_number = int(response.content.decode())
 
-    print(args.tabs)
+    builds = []
+    artifact_keys = set()
+    for build_number in range(max(last_build_number - args.history, 1), last_build_number + 1):
+        response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
+        if response.status_code != 200:
+            print('WARN: Artifact was not available for build number {}'.format(build_number))
+            continue
+        try:
+            artifact = json.loads(response.content.decode())
+        except:
+            print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
+            continue
+        artifact_keys.add(*artifact.keys())
+        builds.append({'build_number': build_number, 'artifact': artifact})
+
+    report = SummaryReport()
+    section = report.add_section()
+    table = section.add_table()
+
+    header = table.add_row()
+    header.add_cell('build')
+    for key in artifact_keys:
+        header.add_cell(key)
+
+    for build in builds:
+        row = table.add_row()
+        row.add_cell(build['build_number'], '{}/{}'.format(args.url, build['build_number']))
+        for key in artifact_keys:
+            if key not in build['artifact']:
+                row.add_cell('-')
+            else:
+                row.add_cell(build['artifact'][key])
+
+    report.write(args.output)
 
 
 if __name__ == '__main__':

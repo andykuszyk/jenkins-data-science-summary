@@ -1,3 +1,6 @@
+import os
+
+
 class SummaryReportLeafBase:
     def __init__(self):
         self._start = []
@@ -49,6 +52,11 @@ class SummaryReportSection(SummaryReportNodeBase):
         self._children.append(tabs)
         return tabs
 
+    def add_table(self):
+        table = SummaryReportTable()
+        self._children.append(table)
+        return table
+
 
 class SummaryReportTabs(SummaryReportNodeBase):
     def __init__(self):
@@ -73,11 +81,45 @@ class SummaryReportTab(SummaryReportNodeBase):
         self._children.append(field)
         return field
 
+
 class SummaryReportField(SummaryReportLeafBase):
     def __init__(self, name, value):
         super().__init__()
         self._start.append('<field name="{}">{}'.format(name, value))
         self._end.append('</field>')
+
+
+class SummaryReportTable(SummaryReportNodeBase):
+    def __init__(self):
+        super().__init__()
+        self._start.append('<table sorttable="yes">')
+        self._end.append('</table>')
+
+    def add_row(self):
+        row = SummaryReportRow()
+        self._children.append(row)
+        return row
+
+
+class SummaryReportRow(SummaryReportNodeBase):
+    def __init__(self):
+        super().__init__()
+        self._start.append('<tr>')
+        self._end.append('</tr>')
+
+    def add_cell(self, text, link=None):
+        cell = SummaryReportCell(text, link)
+        self._children.append(cell)
+        return cell
+
+
+class SummaryReportCell(SummaryReportLeafBase):
+    def __init__(self, text, link=None):
+        super().__init__()
+        if link is None:
+            self._start.append('<td value="{}" align="center"/>'.format(text))
+        else:
+            self._start.append('<td value="{}" align="center" href="{}"/>'.format(text, link))
 
 
 class SummaryReport(SummaryReportNodeBase):
@@ -88,3 +130,7 @@ class SummaryReport(SummaryReportNodeBase):
         section = SummaryReportSection()
         self._children.append(section)
         return section
+
+    def write(self, directory):
+        with open(os.path.join(directory, 'summary.xml'), 'w') as file:
+            file.write(self.generate())
