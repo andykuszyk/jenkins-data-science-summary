@@ -2,10 +2,14 @@ import argparse
 import os
 import json
 import glob
+import requests
+from jdss import SummaryReport
 
 
 def job(args):
-    report = '<section name="" fontcolor=""><tabs>'
+    report = SummaryReport()
+    section = report.add_section()
+    tabs = section.add_tabs()
     for i in range(0, len(args.tabs)):
         tab = args.tabs[i]
         name = 'tab{}'.format(i + 1) if len(args.names) <= i else args.names[i]
@@ -30,6 +34,8 @@ def job(args):
 
 
 def jobs(args):
+    response = requests.get('{}lastBuild/buildNumber'.format(args.url))
+
     print(args.tabs)
 
 
@@ -38,6 +44,15 @@ if __name__ == '__main__':
     sub_parsers = parser.add_subparsers()
 
     jobs_parser = sub_parsers.add_parser('jobs')
+    jobs_parser.add_argument('--url', required=True, help='The url of the build job in Jenkins to summarise')
+    jobs_parser.add_argument(
+        '--artifact',
+        required=True,
+        help='The name of the artifact that will be used to populate the metadata about head job. This should be a JSON '
+             'file containing a list of key value pairs.'
+    )
+    jobs_parser.add_argument('--history', type=int, default=50, help='The number of historic builds to summarise')
+    jobs_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     jobs_parser.set_defaults(func=jobs)
 
     job_parser = sub_parsers.add_parser('job')
