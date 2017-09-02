@@ -1,13 +1,36 @@
 import argparse
+import os
+import json
+import glob
 
 
 def job(args):
-    pass
+    report = '<section name="" fontcolor=""><tabs>'
+    for i in range(0, len(args.tabs)):
+        tab = args.tabs[i]
+        name = 'tab{}'.format(i + 1) if len(args.names) <= i else args.names[i]
+        report += '<tab name="{}">'.format(name)
+        for files in [glob.glob(f) for f in tab]:
+            for file in files:
+                file_name = os.path.splitext(os.path.split(file)[-1])[0]
+                file_ext = os.path.splitext(os.path.split(file)[-1])[1].lower()
+                if file_ext == '.json':
+                    with open(file, 'r') as json_file:
+                        contents = json.loads(json_file.read())
+                    for key in contents:
+                        report += '<field name="{}">{}</field>'.format(key, contents[key])
+                elif file_ext in ['.png', '.jpeg', '.jpg']:
+                    report += '<field name="{}">'.format(file_name)
+                    report += '<![CDATA[<img src="{}"/>]]>'.format(file)
+                    report += '</field>'
+        report += '</tab>'
+    report += '</tabs></section>'
+    with open(os.path.join(args.output, 'summary.xml'), 'w') as file:
+        file.write(report)
 
 
 def jobs(args):
-
-    pass
+    print(args.tabs)
 
 
 if __name__ == '__main__':
@@ -18,8 +41,26 @@ if __name__ == '__main__':
     jobs_parser.set_defaults(func=jobs)
 
     job_parser = sub_parsers.add_parser('job')
-    job_parser.add_argument('--metrics', help='The path to the json file containing the metrics to display on the metrics tab')
-    job_parser.add_argument('--charts', nargs='*', help='A list of file paths to the charts to dispay on the charts tab')
+    job_parser.add_argument(
+        '--tabs',
+        action='append',
+        default=[],
+        nargs='*',
+        help='This option can  be used multiple times to specify the content of an individual tab. Multiple values can '
+             'be provided, each being a file path that is read. If the file contains XML or JSON, the values are parsed '
+             'into a field per property. The assumption here is that the file will contain key value pairs - if the '
+             'structure is more complicated, nested objects will be ignored. If the file paths provided are PNG or JPEG '
+             'files then these will be included in the tab as images.'
+    )
+    job_parser.add_argument(
+        '--names',
+        default=[],
+        nargs='*',
+        help='A list of names to be used when labelling the tabs whose content is provided in `--tabs`. If no names are '
+             'provided then the tabs will be labelled tab1, tab2, etc. If more names are provided than tabs then the '
+             'extras will be ignored.'
+    )
+    job_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     job_parser.set_defaults(func=job)
 
     args = parser.parse_args()
