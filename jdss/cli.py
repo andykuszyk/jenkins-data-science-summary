@@ -11,8 +11,8 @@ def job(args):
     report = SummaryReport()
     section = report.add_section()
     tabs = section.add_tabs()
-    for i in range(0, len(args.tabs)):
-        tab_contents = args.tabs[i]
+    for i in range(0, len(args.tab)):
+        tab_contents = args.tab[i]
         name = 'tab{}'.format(i + 1) if len(args.names) <= i else args.names[i]
         tab = tabs.add_tab(name)
         for files in [glob.glob(f) for f in tab_contents]:
@@ -95,7 +95,7 @@ def main():
 
     job_parser = sub_parsers.add_parser('job')
     job_parser.add_argument(
-        '--tabs',
+        '--tab',
         action='append',
         default=[],
         nargs='*',
