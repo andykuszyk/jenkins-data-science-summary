@@ -2,7 +2,6 @@ language: python
 python:
     - "3.3"
 script:
-    - pip install -r requirements.txt
     - python setup.py sdist
 deploy:
     provider: pypi
