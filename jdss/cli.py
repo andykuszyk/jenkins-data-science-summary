@@ -57,7 +57,8 @@ def jobs(args):
 
     report = SummaryReport()
     section = report.add_section()
-    table = section.add_table()
+    accordion = section.add_accordion('History')
+    table = accordion.add_table()
 
     header = table.add_row()
     header.add_cell('build')
