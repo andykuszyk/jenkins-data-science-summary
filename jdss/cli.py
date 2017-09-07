@@ -70,7 +70,7 @@ def jobs(args):
     report.write(args.output)
 
 
-def main()
+def main():
     parser = argparse.ArgumentParser()
     sub_parsers = parser.add_subparsers()
 
