@@ -1,13 +1,11 @@
 language: python
 python:
-    - 3.5
+- 3.5
 script:
-    - echo building...
+- echo building...
 deploy:
-    provider: pypi
-    user: andykuszyk
-    password:
-        secure: KooyUf5URL4P4pIZHwJ2hMoGDy9DqqfuNgcRLZ55PAtMAQzrXNzxVWMvkTdPbJkqE+dJwreMHi6kMpEt1baaCe4pecDc9sjJTKiq8KpiK7VfgvS28Zj4f+OXuaWOclQdj7NiEbqDg7LxKqyp3R403j3FIlJ6nfeMTgwV+UF1qySQNSWcYqjm5ndjhEY+5iJkwvpehKx3YCKMMnN3xpDOeTpoeegSN/JLfM8hKayjk7cwSx/7Ivi6wawFfO4E7C6wnCgN+ct3gqIBVEN3obYbeuOGsUDMrPw4ltGz6ZTj89FI8htus0RKwsYpuFZMjE2CammkjWcb3BTFjR1JTLKxbbPYRQANPSFKx6SE8SFfXTELvhgVc6UV9jH3P5V65bnm7X6hRHbWndPOvbVy3rX+f2VT05bpIol+j1NH6g0XN6wQGdSQ5bsltZxXX/X7LoMVNcKHLlUpiL5G4gDWQUcVC1oiaJ32cRX/yI63/YQJs6cH+S1m+rJLjfgPBJqadavk1eIHF5ObAObWWk8gwCpjWgC6Sqm0mdqfMgAXBKl5MOL1HcM5Yjaop2qv5Zg06EaKYeH6VbyQwAgtR8aDn6FN1JnlMzQk/Z7CNiwDbnPWKZplodANn5TppqOaX6RjvAq+VKy29Ne741j9sGV7YbnHmVjfaMqJqguQVtwyYcEimDE=
-    on:
-#        tags: true
+  provider: pypi
+  user: andykuszyk
+  password:
+    secure: adqUysuDUK6xuJQa7AvOJTvf7XyylTrWk41PoFPje2RkS/9ka5yfWiAUAqZo4QQl3bXgVDQ5mdA3L4hiGLsq7sm2p2ASziEuVrATDQWdEeJiB44785OnW01vx9lydzSaR81YFKAF1rQID9gcHTaGvdhqiVebH0JDP8cP1/4hlKyzPTdUcLQe2+QxW6nYspf/DP/xaQ+nTxEObCO197TOUOrZwhRr9F/0YRIsudvtd8dqCmNWZI29KZR6kskIe3dC4xXbpzq3JKyshUU651zxslNyCc4yiHnsh1jAFyp7G1pVwmCkpB+yReVp3DaR4HHyAehlrd4mqlpp6OMplWOrc+APW55Pt6M+z2SFAQL9EdIIK+Y8tfNQuTqSBgoXE2/hXnc7u1iZLLW6LjLK61+JpFdJDs1HoP3dfS3A4ydAZMiqHxKFwSaF84AvMLaWI8NjDdNOKi/Dd3buCPACHKYdVmzhFDF4zmwCxNOmZ7YRs+abXH72Jr+q5Tkb6mwLdlk8Yivv+IyaAOlh+ENSkHteEK7K8tAPa5UtmfM3Wh8UMP7KtQSn6qK0IG3Um5hGxD0JcMriO3oPGmjyOUcdHndVHZnlLtPTmCiI9p0mknxKydbRcGlXOpCAMI99I/GsPG8EAeewr1Xi18sIkGWUFEtkGyoIAYi/T9xMePWSRAo6JZw=
 
