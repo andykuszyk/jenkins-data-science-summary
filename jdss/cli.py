@@ -4,6 +4,7 @@ import json
 import glob
 import requests
 from jdss import SummaryReport
+import base64
 
 
 def job(args):
@@ -24,7 +25,12 @@ def job(args):
                     for key in contents:
                         tab.add_field(key, contents[key])
                 elif file_ext in ['.png', '.jpeg', '.jpg']:
-                    tab.add_field(file_name, '<![CDATA[<img src="{}"/>]]>'.format(file))
+                    with open(file, 'rb') as image:
+                        image_data = base64.b64encode(image.read()).decode('utf-8').replace('\n', '')
+                    tab.add_field(
+                        file_name,
+                        '<![CDATA[<img src="data:image/{};base64,{}"/>]]>'.format(file_ext[1:], image_data)
+                    )
     report.write(args.output)
 
 
