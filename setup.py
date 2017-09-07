@@ -13,7 +13,7 @@ setup(
     install_requires=[],
     entry_points={
         'console_scripts': [
-            'jdss=jdss.py:main',
+            'jdss=jdss.cli:main',
         ],
     },
 )
