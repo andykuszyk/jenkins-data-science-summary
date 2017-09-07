@@ -70,7 +70,7 @@ def jobs(args):
     report.write(args.output)
 
 
-if __name__ == '__main__':
+def main()
     parser = argparse.ArgumentParser()
     sub_parsers = parser.add_subparsers()
 
@@ -111,3 +111,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.func(args)
+
+
+if __name__ == '__main__':
+    main()
