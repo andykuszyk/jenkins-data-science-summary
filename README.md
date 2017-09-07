@@ -14,7 +14,7 @@ pip install jdss
 ### Single build results (e.g. training a model)
 Build a report that shows some metrics and some images on multiple tabs:
 ```
-jdss job --tabs metrics.json *.png --names Metrics Images --output ./
+jdss job --tabs metrics.json --tabs *.png --names Metrics Images --output ./
 ```
 This will generate a `summary.xml` file in the current directory, with two tabs.
 
