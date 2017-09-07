@@ -1,0 +1,7 @@
+deploy:
+        provider: pypi
+        user: "andykuszyk"
+        password:
+		secure: fAoNaoLI01ovtYxFT6auD0bjIcjqDa8tRgAmAFV0q3+m3B5uYdFs7/PGJD7F7m9VNTOvNL9BMQGTFvq4EOC4gjmxku9KhJE5tnADmskCIR6sB4buUx9LE25HfOK8ZiRcODKS9LRd7eKy/bhyzq0U8M38w4jcNLj72BjHoTTPotT2EzfnTyWD6x5xZ+NwrfGJyb3QhL9yJmb/rQqGd4UW3za37wb9T6wADWEjPRsf2JH/JWQFQhM87Rhtju/g0ckbpcYM3KeGOX9j5nbkJC+ajefh8noLqqEQx4ejEFLvMWwzhqUPHk/Mcc4NpQfT7C425rDysOsW27tjwy4XT9MEspqopJhhmiCX1UBOdWzPVP9QomfxG/AKI+Fjm5d2aERV/Q5R7NwRXuxOwgoULOOl6wSnJ5v54x03T1gKQ7yCYnvz6FVmMYxWCS+wsnvMg4AZzUcApLHPNPQxJBHeSHyPXGnGD3l2Z+4DqM/4VYeXIs7iOVbXbOdvmkGapQa7Fg8GErWuVEQNi+mw4o8TWNgu4rQPoclJRPQY3f8SfgkznRmw9XyUTPY66Px6Neh2/YmYE/QTypzN+ZCumPsMih6idH9cbW3OP//lt2rB3u9rUqH5eLYkNnmYbI6gJy9fC5mtaQr6tHUcw1f35Xol+QpFQqtavS+bQkxQKrclZ/vnrCE=
+	on:
+		tags: true
