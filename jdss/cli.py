@@ -52,7 +52,8 @@ def jobs(args):
         except:
             print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
             continue
-        artifact_keys.add(*artifact.keys())
+        for key in artifact.keys():
+            artifact_keys.add(key)
         builds.append({'build_number': build_number, 'artifact': artifact})
 
     report = SummaryReport()
