@@ -61,7 +61,7 @@ def jobs(args):
 
     report = SummaryReport()
     section = report.add_section()
-    accordion = section.add_accordion('History')
+    accordion = section.add_accordion(args.name)
     table = accordion.add_table()
 
     header = table.add_row()
@@ -96,6 +96,7 @@ def main():
              'file containing a list of key value pairs.'
     )
     jobs_parser.add_argument('--history', type=int, default=50, help='The number of historic builds to summarise')
+    jobs_parser.add_argument('--name', default='History', help='The name to put on the accordion header')
     jobs_parser.add_argument('--file', default='summary.xml', help='The name of the output file')
     jobs_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     jobs_parser.set_defaults(func=jobs)
