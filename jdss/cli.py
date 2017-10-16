@@ -43,21 +43,25 @@ def jobs(args):
 
     builds = []
     artifact_keys = set()
-    for build_number in range(max(last_build_number - args.history, 1), last_build_number + 1):
+    build_number = last_build_number
+    while build_number > 0 and len(builds) <= args.history:
         artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
         summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
         if artifact_response.status_code != 200 or summary_response.status_code != 200:
             print('WARN: Artifact was not available for build number {}'.format(build_number))
+            build_number -= 1
             continue
         try:
             artifact = json.loads(artifact_response.content.decode())
             summary = json.loads(summary_response.content.decode())
         except:
             print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
+            build_number -= 1
             continue
         for key in artifact.keys():
             artifact_keys.add(key)
         builds.append({'build_number': build_number, 'artifact': artifact, 'description': summary['description']})
+        build_number -= 1
 
     report = SummaryReport()
     section = report.add_section()
