@@ -58,7 +58,7 @@ def jobs(args):
             continue
 
         for artifact in args.artifact:
-            artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
+            artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, artifact))
             if artifact_response.status_code != 200:
                 print('WARN: Artifact was not available for build number {}'.format(build_number))
                 continue
@@ -74,7 +74,7 @@ def jobs(args):
                     artifact_keys.add(key)
                 else:
                     artifact_keys.add('{}/{}'.format(os.path.splitext(artifact)[0], key))
-                    
+
         builds.append({'build_number': build_number, 'artifact': artifact, 'description': summary['description']})
         build_number -= 1
 
