@@ -45,21 +45,36 @@ def jobs(args):
     artifact_keys = set()
     build_number = last_build_number
     while build_number > 0 and len(builds) <= args.history:
-        artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
         summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
-        if artifact_response.status_code != 200 or summary_response.status_code != 200:
-            print('WARN: Artifact was not available for build number {}'.format(build_number))
+        if summary_response.status_code != 200:
+            print('WARN: Summary was not available for build number {}'.format(build_number))
             build_number -= 1
             continue
         try:
-            artifact = json.loads(artifact_response.content.decode())
             summary = json.loads(summary_response.content.decode())
         except:
-            print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
+            print('WARN: Summary was not valid JSON for build number {}'.format(build_number))
             build_number -= 1
             continue
-        for key in artifact.keys():
-            artifact_keys.add(key)
+
+        for artifact in args.artifact:
+            artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
+            if artifact_response.status_code != 200:
+                print('WARN: Artifact was not available for build number {}'.format(build_number))
+                continue
+
+            try:
+                artifact = json.loads(artifact_response.content.decode())
+            except:
+                print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
+                continue
+
+            for key in artifact.keys():
+                if len(args.artifact) == 1:
+                    artifact_keys.add(key)
+                else:
+                    artifact_keys.add('{}/{}'.format(os.path.splitext(artifact)[0], key))
+                    
         builds.append({'build_number': build_number, 'artifact': artifact, 'description': summary['description']})
         build_number -= 1
 
@@ -95,9 +110,10 @@ def main():
     jobs_parser.add_argument('--url', required=True, help='The url of the build job in Jenkins to summarise')
     jobs_parser.add_argument(
         '--artifact',
+        nargs='*',
         required=True,
-        help='The name of the artifact that will be used to populate the metadata about head job. This should be a JSON '
-             'file containing a list of key value pairs.'
+        help='The name, or names, of the artifact that will be used to populate the metadata about head job. This should be a JSON '
+             'file containing a list of key value pairs. e.g. `--artifact metrics.json`, `--artifacts metrics-1.json metrics-2.json`'
     )
     jobs_parser.add_argument('--history', type=int, default=50, help='The number of historic builds to summarise')
     jobs_parser.add_argument('--name', default='History', help='The name to put on the accordion header')
