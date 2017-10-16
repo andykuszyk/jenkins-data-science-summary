@@ -42,9 +42,10 @@ def jobs(args):
     last_build_number = int(response.content.decode())
 
     builds = []
-    artifact_keys = set()
     build_number = last_build_number
+    artifact_keys = set()
     while build_number > 0 and len(builds) <= args.history:
+        artifact_values = {}
         summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
         if summary_response.status_code != 200:
             print('WARN: Summary was not available for build number {}'.format(build_number))
@@ -64,18 +65,21 @@ def jobs(args):
                 continue
 
             try:
-                artifact = json.loads(artifact_response.content.decode())
+                artifact_content = json.loads(artifact_response.content.decode())
             except:
                 print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
                 continue
 
-            for key in artifact.keys():
+            for key in artifact_content.keys():
                 if len(args.artifact) == 1:
-                    artifact_keys.add(key)
+                    artifact_values[key] = artifact_content[key]
                 else:
-                    artifact_keys.add('{}/{}'.format(os.path.splitext(artifact)[0], key))
+                    artifact_values['{}/{}'.format(os.path.splitext(artifact)[0], key)] = artifact_content[key]
 
-        builds.append({'build_number': build_number, 'artifact': artifact, 'description': summary['description']})
+        for key in artifact_values.keys():
+            artifact_keys.add(key)
+
+        builds.append({'build_number': build_number, 'artifact': artifact_values, 'description': summary['description']})
         build_number -= 1
 
     report = SummaryReport()
@@ -85,7 +89,7 @@ def jobs(args):
 
     header = table.add_row()
     header.add_cell('build')
-    for key in artifact_keys:
+    for key in artifact_values:
         header.add_cell(key)
     header.add_cell('description')
 
