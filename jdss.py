@@ -25,7 +25,7 @@ def job(args):
                         tab.add_field(key, contents[key])
                 elif file_ext in ['.png', '.jpeg', '.jpg']:
                     tab.add_field(file_name, '<![CDATA[<img src="{}"/>]]>'.format(file))
-    report.write(args.output)
+    report.write(args.file, args.output)
 
 
 def jobs(args):
@@ -67,7 +67,7 @@ def jobs(args):
             else:
                 row.add_cell(build['artifact'][key])
 
-    report.write(args.output)
+    report.write(args.file, args.output)
 
 
 if __name__ == '__main__':
@@ -83,6 +83,7 @@ if __name__ == '__main__':
              'file containing a list of key value pairs.'
     )
     jobs_parser.add_argument('--history', type=int, default=50, help='The number of historic builds to summarise')
+    jobs_parser.add_argument('--file', default='summary.xml', help='The name of the output file')
     jobs_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     jobs_parser.set_defaults(func=jobs)
 
@@ -106,6 +107,7 @@ if __name__ == '__main__':
              'provided then the tabs will be labelled tab1, tab2, etc. If more names are provided than tabs then the '
              'extras will be ignored.'
     )
+    job_parser.add_argument('--file', default='summary.xml', help='The name of the output file')
     job_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     job_parser.set_defaults(func=job)
 
