@@ -89,7 +89,7 @@ def jobs(args):
 
     header = table.add_row()
     header.add_cell('build')
-    for key in artifact_values:
+    for key in artifact_keys:
         header.add_cell(key)
     header.add_cell('description')
 
