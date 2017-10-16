@@ -4,14 +4,15 @@ import json
 import glob
 import requests
 from jdss import SummaryReport
+import base64
 
 
 def job(args):
     report = SummaryReport()
     section = report.add_section()
     tabs = section.add_tabs()
-    for i in range(0, len(args.tabs)):
-        tab_contents = args.tabs[i]
+    for i in range(0, len(args.tab)):
+        tab_contents = args.tab[i]
         name = 'tab{}'.format(i + 1) if len(args.names) <= i else args.names[i]
         tab = tabs.add_tab(name)
         for files in [glob.glob(f) for f in tab_contents]:
@@ -25,6 +26,12 @@ def job(args):
                         tab.add_field(key, contents[key])
                 elif file_ext in ['.png', '.jpeg', '.jpg']:
                     tab.add_field(file_name, '<![CDATA[<img src="{}"/>]]>'.format(file))
+                    with open(file, 'rb') as image:
+                        image_data = base64.b64encode(image.read()).decode('utf-8').replace('\n', '')
+                    tab.add_field(
+                        file_name,
+                        '<![CDATA[<img src="data:image/{};base64,{}"/>]]>'.format(file_ext[1:], image_data)
+                    )
     report.write(args.file, args.output)
 
 
@@ -37,26 +44,31 @@ def jobs(args):
     builds = []
     artifact_keys = set()
     for build_number in range(max(last_build_number - args.history, 1), last_build_number + 1):
-        response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
-        if response.status_code != 200:
+        artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
+        summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
+        if artifact_response.status_code != 200 or summary_response.status_code != 200:
             print('WARN: Artifact was not available for build number {}'.format(build_number))
             continue
         try:
-            artifact = json.loads(response.content.decode())
+            artifact = json.loads(artifact_response.content.decode())
+            summary = json.loads(summary_response.content.decode())
         except:
             print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
             continue
-        artifact_keys.add(*artifact.keys())
-        builds.append({'build_number': build_number, 'artifact': artifact})
+        for key in artifact.keys():
+            artifact_keys.add(key)
+        builds.append({'build_number': build_number, 'artifact': artifact, 'description': summary['description']})
 
     report = SummaryReport()
     section = report.add_section()
-    table = section.add_table()
+    accordion = section.add_accordion('History')
+    table = accordion.add_table()
 
     header = table.add_row()
     header.add_cell('build')
     for key in artifact_keys:
         header.add_cell(key)
+    header.add_cell('description')
 
     for build in builds:
         row = table.add_row()
@@ -66,11 +78,12 @@ def jobs(args):
                 row.add_cell('-')
             else:
                 row.add_cell(build['artifact'][key])
+        row.add_cell(build['description'])
 
     report.write(args.file, args.output)
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     sub_parsers = parser.add_subparsers()
 
@@ -89,7 +102,7 @@ if __name__ == '__main__':
 
     job_parser = sub_parsers.add_parser('job')
     job_parser.add_argument(
-        '--tabs',
+        '--tab',
         action='append',
         default=[],
         nargs='*',
@@ -113,3 +126,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     args.func(args)
+
+
+if __name__ == '__main__':
+    main()

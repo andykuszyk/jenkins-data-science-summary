@@ -1,0 +1,12 @@
+language: python
+python:
+- 3.5
+script:
+- echo building...
+deploy:
+  provider: pypi
+  user: andykuszyk
+  password:
+    secure: adqUysuDUK6xuJQa7AvOJTvf7XyylTrWk41PoFPje2RkS/9ka5yfWiAUAqZo4QQl3bXgVDQ5mdA3L4hiGLsq7sm2p2ASziEuVrATDQWdEeJiB44785OnW01vx9lydzSaR81YFKAF1rQID9gcHTaGvdhqiVebH0JDP8cP1/4hlKyzPTdUcLQe2+QxW6nYspf/DP/xaQ+nTxEObCO197TOUOrZwhRr9F/0YRIsudvtd8dqCmNWZI29KZR6kskIe3dC4xXbpzq3JKyshUU651zxslNyCc4yiHnsh1jAFyp7G1pVwmCkpB+yReVp3DaR4HHyAehlrd4mqlpp6OMplWOrc+APW55Pt6M+z2SFAQL9EdIIK+Y8tfNQuTqSBgoXE2/hXnc7u1iZLLW6LjLK61+JpFdJDs1HoP3dfS3A4ydAZMiqHxKFwSaF84AvMLaWI8NjDdNOKi/Dd3buCPACHKYdVmzhFDF4zmwCxNOmZ7YRs+abXH72Jr+q5Tkb6mwLdlk8Yivv+IyaAOlh+ENSkHteEK7K8tAPa5UtmfM3Wh8UMP7KtQSn6qK0IG3Um5hGxD0JcMriO3oPGmjyOUcdHndVHZnlLtPTmCiI9p0mknxKydbRcGlXOpCAMI99I/GsPG8EAeewr1Xi18sIkGWUFEtkGyoIAYi/T9xMePWSRAo6JZw=
+  on:
+    tags: true

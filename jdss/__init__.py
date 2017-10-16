@@ -57,6 +57,23 @@ class SummaryReportSection(SummaryReportNodeBase):
         self._children.append(table)
         return table
 
+    def add_accordion(self, name):
+        accordion = SummaryReportAccordion(name)
+        self._children.append(accordion)
+        return accordion
+
+
+class SummaryReportAccordion(SummaryReportNodeBase):
+    def __init__(self, name):
+        super().__init__()
+        self._start.append('<accordion name="{}">'.format(name))
+        self._end.append('</accordion>')
+
+    def add_table(self):
+        table = SummaryReportTable()
+        self._children.append(table)
+        return table
+
 
 class SummaryReportTabs(SummaryReportNodeBase):
     def __init__(self):
