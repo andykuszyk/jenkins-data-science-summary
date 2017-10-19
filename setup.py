@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='jdss',
     packages=['jdss'],
-    version='0.1.8',
+    version='0.1.9',
     description='A command line tool for generating Jenkins summary reports for data science activities',
     author='Andy Kuszyk',
     author_email='pairofsocks@hotmail.co.uk',
