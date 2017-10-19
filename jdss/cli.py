@@ -53,16 +53,17 @@ def jobs(args):
                 continue
             try:
                 summary = json.loads(summary_response.content.decode())
-                if summary['result'].upper() != 'SUCCESS':
-                    print('INFO: Skipping build {}, because it did not succeed'.format(build_number))
-                    continue
-                for parameter in args.parameters:
-                    if parameter in [p['name'] for p in summary['actions']['parameters']]:
-                        artifact_keys.add(parameter)
-                        artifact_values[parameter] = [p['value'] for p in summary['actions']['parameters'] if p['name'] == parameter][0]
             except:
                 print('WARN: Summary was not valid JSON for build number {}'.format(build_number))
                 continue
+            
+            if summary['result'].upper() != 'SUCCESS':
+                print('INFO: Skipping build {}, because it did not succeed'.format(build_number))
+                continue
+            for parameter in args.parameters:
+                if parameter in [p['name'] for p in summary['actions']['parameters']]:
+                    artifact_keys.add(parameter)
+                    artifact_values[parameter] = [p['value'] for p in summary['actions']['parameters'] if p['name'] == parameter][0]
 
             for artifact in args.artifact:
                 artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, artifact))
