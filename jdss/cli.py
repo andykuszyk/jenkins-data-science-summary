@@ -45,42 +45,50 @@ def jobs(args):
     build_number = last_build_number
     artifact_keys = set()
     while build_number > 0 and len(builds) <= args.history:
-        artifact_values = {}
-        summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
-        if summary_response.status_code != 200:
-            print('WARN: Summary was not available for build number {}'.format(build_number))
-            build_number -= 1
-            continue
         try:
-            summary = json.loads(summary_response.content.decode())
-        except:
-            print('WARN: Summary was not valid JSON for build number {}'.format(build_number))
-            build_number -= 1
-            continue
-
-        for artifact in args.artifact:
-            artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, artifact))
-            if artifact_response.status_code != 200:
-                print('WARN: Artifact was not available for build number {}'.format(build_number))
+            artifact_values = {}
+            summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
+            if summary_response.status_code != 200:
+                print('WARN: Summary was not available for build number {}'.format(build_number))
                 continue
-
             try:
-                artifact_content = json.loads(artifact_response.content.decode())
+                summary = json.loads(summary_response.content.decode())
+                if summary['result'].upper() != 'SUCCESS':
+                    print('INFO: Skipping build {}, because it did not succeed'.format(build_number))
+                    continue
+                for parameter in args.parameters:
+                    if parameter in [p['name'] for p in summary['actions']['parameters']]:
+                        artifact_keys.add(parameter)
+                        artifact_values[parameter] = [p['value'] for p in summary['actions']['parameters'] if p['name'] == parameter][0]
             except:
-                print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
+                print('WARN: Summary was not valid JSON for build number {}'.format(build_number))
                 continue
 
-            for key in artifact_content.keys():
-                if len(args.artifact) == 1:
-                    artifact_values[key] = artifact_content[key]
-                else:
-                    artifact_values['{}/{}'.format(os.path.splitext(artifact)[0], key)] = artifact_content[key]
+            for artifact in args.artifact:
+                artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, artifact))
+                if artifact_response.status_code != 200:
+                    print('WARN: Artifact was not available for build number {}'.format(build_number))
+                    continue
 
-        for key in artifact_values.keys():
-            artifact_keys.add(key)
+                try:
+                    artifact_content = json.loads(artifact_response.content.decode())
+                except:
+                    print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
+                    continue
 
-        builds.append({'build_number': build_number, 'artifact': artifact_values, 'description': summary['description']})
-        build_number -= 1
+                for key in artifact_content.keys():
+                    if len(args.artifact) == 1:
+                        artifact_values[key] = artifact_content[key]
+                    else:
+                        artifact_values['{}/{}'.format(os.path.splitext(artifact)[0], key)] = artifact_content[key]
+
+            for key in artifact_values.keys():
+                artifact_keys.add(key)
+
+            builds.append({'build_number': build_number, 'artifact': artifact_values, 'description': summary['description']})
+
+        finally:
+            build_number -= 1
 
     report = SummaryReport()
     section = report.add_section()
@@ -122,6 +130,7 @@ def main():
     jobs_parser.add_argument('--history', type=int, default=50, help='The number of historic builds to summarise')
     jobs_parser.add_argument('--name', default='History', help='The name to put on the accordion header')
     jobs_parser.add_argument('--file', default='summary.xml', help='The name of the output file')
+    jobs_parser.add_argument('--parameters', default=[], nargs='*', help='If provided, this is the list of build parameter names that should be included from the build results')
     jobs_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     jobs_parser.set_defaults(func=jobs)
 
