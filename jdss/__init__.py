@@ -153,6 +153,6 @@ class SummaryReport(SummaryReportNodeBase):
         self._children.append(section)
         return section
 
-    def write(self, directory):
-        with open(os.path.join(directory, 'summary.xml'), 'w') as file:
+    def write(self, file_name, directory):
+        with open(os.path.join(directory, file_name), 'w') as file:
             file.write(self.generate())

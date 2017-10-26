@@ -37,7 +37,7 @@ def job(args):
                         file_name,
                         '<![CDATA[<img src="data:image/{};base64,{}"/>]]>'.format(file_ext[1:], image_data)
                     )
-    report.write(args.output)
+    report.write(args.file, args.output)
 
 
 def jobs(args):
@@ -47,26 +47,58 @@ def jobs(args):
     last_build_number = int(response.content.decode())
 
     builds = []
+    build_number = last_build_number
     artifact_keys = set()
-    for build_number in range(max(last_build_number - args.history, 1), last_build_number + 1):
-        artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, args.artifact))
-        summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
-        if artifact_response.status_code != 200 or summary_response.status_code != 200:
-            print('WARN: Artifact was not available for build number {}'.format(build_number))
-            continue
+    while build_number > 0 and len(builds) <= args.history:
         try:
-            artifact = json.loads(artifact_response.content.decode())
-            summary = json.loads(summary_response.content.decode())
-        except:
-            print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
-            continue
-        for key in artifact.keys():
-            artifact_keys.add(key)
-        builds.append({'build_number': build_number, 'artifact': artifact, 'description': summary['description']})
+            artifact_values = {}
+            summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
+            if summary_response.status_code != 200:
+                print('WARN: Summary was not available for build number {}'.format(build_number))
+                continue
+            try:
+                summary = json.loads(summary_response.content.decode())
+            except:
+                print('WARN: Summary was not valid JSON for build number {}'.format(build_number))
+                continue
+
+            if summary['result'].upper() != 'SUCCESS':
+                print('INFO: Skipping build {}, because it did not succeed'.format(build_number))
+                continue
+            for parameter in args.parameters:
+                if len(summary['actions']) > 0 and 'parameters' in summary['actions'][0] and parameter in [p['name'] for p in summary['actions'][0]['parameters']]:
+                    artifact_keys.add(parameter)
+                    artifact_values[parameter] = [p['value'] for p in summary['actions'][0]['parameters'] if p['name'] == parameter][0]
+
+            for artifact in args.artifact:
+                artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, artifact))
+                if artifact_response.status_code != 200:
+                    print('WARN: Artifact was not available for build number {}'.format(build_number))
+                    continue
+
+                try:
+                    artifact_content = json.loads(artifact_response.content.decode())
+                except:
+                    print('WARN: Artifact was not valid JSON for build number {}'.format(build_number))
+                    continue
+
+                for key in artifact_content.keys():
+                    if len(args.artifact) == 1:
+                        artifact_values[key] = artifact_content[key]
+                    else:
+                        artifact_values['{}/{}'.format(os.path.splitext(artifact)[0], key)] = artifact_content[key]
+
+            for key in artifact_values.keys():
+                artifact_keys.add(key)
+
+            builds.append({'build_number': build_number, 'artifact': artifact_values, 'description': summary['description']})
+
+        finally:
+            build_number -= 1
 
     report = SummaryReport()
     section = report.add_section()
-    accordion = section.add_accordion('History')
+    accordion = section.add_accordion(args.name)
     table = accordion.add_table()
 
     header = table.add_row()
@@ -86,7 +118,7 @@ def jobs(args):
                 row.add_cell(build['artifact'][key])
         row.add_cell(build['description'])
 
-    report.write(args.output)
+    report.write(args.file, args.output)
 
 
 def main():
@@ -97,11 +129,15 @@ def main():
     jobs_parser.add_argument('--url', required=True, help='The url of the build job in Jenkins to summarise')
     jobs_parser.add_argument(
         '--artifact',
+        nargs='*',
         required=True,
-        help='The name of the artifact that will be used to populate the metadata about head job. This should be a JSON '
-             'file containing a list of key value pairs.'
+        help='The name, or names, of the artifact that will be used to populate the metadata about head job. This should be a JSON '
+             'file containing a list of key value pairs. e.g. `--artifact metrics.json`, `--artifacts metrics-1.json metrics-2.json`'
     )
     jobs_parser.add_argument('--history', type=int, default=50, help='The number of historic builds to summarise')
+    jobs_parser.add_argument('--name', default='History', help='The name to put on the accordion header')
+    jobs_parser.add_argument('--file', default='summary.xml', help='The name of the output file')
+    jobs_parser.add_argument('--parameters', default=[], nargs='*', help='If provided, this is the list of build parameter names that should be included from the build results')
     jobs_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     jobs_parser.set_defaults(func=jobs)
 
@@ -125,6 +161,7 @@ def main():
              'provided then the tabs will be labelled tab1, tab2, etc. If more names are provided than tabs then the '
              'extras will be ignored.'
     )
+    job_parser.add_argument('--file', default='summary.xml', help='The name of the output file')
     job_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     job_parser.set_defaults(func=job)
 
