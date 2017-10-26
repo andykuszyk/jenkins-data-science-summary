@@ -22,8 +22,14 @@ def job(args):
                 if file_ext == '.json':
                     with open(file, 'r') as json_file:
                         contents = json.loads(json_file.read())
-                    for key in contents:
-                        tab.add_field(key, contents[key])
+                    table = tab.add_table()
+                    header = table.add_row()
+                    header.add_cell('Key')
+                    header.add_cell('Value')
+                    for key in sorted(contents.keys):
+                        row = table.add_row()
+                        row.add_cell(key)
+                        row.add_cell(contents[key])
                 elif file_ext in ['.png', '.jpeg', '.jpg']:
                     with open(file, 'rb') as image:
                         image_data = base64.b64encode(image.read()).decode('utf-8').replace('\n', '')
@@ -65,14 +71,15 @@ def jobs(args):
 
     header = table.add_row()
     header.add_cell('build')
-    for key in artifact_keys:
+    sorted_keys = sorted(artifact_keys)
+    for key in sorted_keys:
         header.add_cell(key)
     header.add_cell('description')
 
     for build in builds:
         row = table.add_row()
         row.add_cell(build['build_number'], '{}/{}'.format(args.url, build['build_number']))
-        for key in artifact_keys:
+        for key in sorted_keys:
             if key not in build['artifact']:
                 row.add_cell('-')
             else:

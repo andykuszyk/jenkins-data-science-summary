@@ -98,6 +98,11 @@ class SummaryReportTab(SummaryReportNodeBase):
         self._children.append(field)
         return field
 
+    def add_table(self):
+        table = SummaryReportTable()
+        self._children.append(table)
+        return table
+
 
 class SummaryReportField(SummaryReportLeafBase):
     def __init__(self, name, value):
