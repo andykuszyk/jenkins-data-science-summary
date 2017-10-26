@@ -26,7 +26,7 @@ def job(args):
                     header = table.add_row()
                     header.add_cell('Key')
                     header.add_cell('Value')
-                    for key in sorted(contents.keys):
+                    for key in sorted(contents.keys()):
                         row = table.add_row()
                         row.add_cell(key)
                         row.add_cell(contents[key])
