@@ -41,7 +41,12 @@ def job(args):
 
 
 def jobs(args):
-    response = requests.get('{}lastBuild/buildNumber'.format(args.url))
+    url = '{}lastBuild/buildNumber'.format(args.url)
+    response = (
+        requests.get(url)
+        if args.user is None or args.password is None else
+        requests.get(url, auth=(args.user, args.password))
+    )
     if response.status_code != 200:
         raise Exception('Not ok response received for latest build number. Check the url and credentials')
     last_build_number = int(response.content.decode())
