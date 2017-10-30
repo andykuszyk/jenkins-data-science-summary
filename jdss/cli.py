@@ -52,7 +52,13 @@ def jobs(args):
     while build_number > 0 and len(builds) <= args.history:
         try:
             artifact_values = {}
-            summary_response = requests.get('{}/{}/api/json'.format(args.url, build_number))
+            url = '{}/{}/api/json'.format(args.url, build_number)
+            summary_response = (
+                requests.get(url)
+                if args.user is None or args.password is None else
+                requests.get(url, auth=(args.user, args.password))
+            )
+
             if summary_response.status_code != 200:
                 print('WARN: Summary was not available for build number {}'.format(build_number))
                 continue
@@ -71,7 +77,13 @@ def jobs(args):
                     artifact_values[parameter] = [p['value'] for p in summary['actions'][0]['parameters'] if p['name'] == parameter][0]
 
             for artifact in args.artifact:
-                artifact_response = requests.get('{}/{}/artifact/{}'.format(args.url, build_number, artifact))
+                url = '{}/{}/artifact/{}'.format(args.url, build_number, artifact)
+                artifact_response = (
+                    requests.get(url)
+                    if args.user is None or args.password is None else
+                    requests.get(url, auth=(args.user, args.password))
+                )
+
                 if artifact_response.status_code != 200:
                     print('WARN: Artifact was not available for build number {}'.format(build_number))
                     continue
@@ -138,6 +150,8 @@ def main():
     jobs_parser.add_argument('--name', default='History', help='The name to put on the accordion header')
     jobs_parser.add_argument('--file', default='summary.xml', help='The name of the output file')
     jobs_parser.add_argument('--parameters', default=[], nargs='*', help='If provided, this is the list of build parameter names that should be included from the build results')
+    jobs_parser.add_argument('--user', default=None, help='The username to use when communicating with Jenkins, if basic authentication is enabled')
+    jobs_parser.add_argument('--password', default=None,help='The password to use when communicating with Jenkins, if basic authentication is enabled')
     jobs_parser.add_argument('--output', required=True, help='The output directory into which the summary report XML file should be written')
     jobs_parser.set_defaults(func=jobs)
 

@@ -24,6 +24,21 @@ Summaries multiple jobs in a table:
 jdss jobs --url http://jenkins/my-job/ --history 10 --artifact metrics.json
 ```
 
+With multiple artifacts:
+```
+jdss jobs --url http://jenkins/my-job/ --history 10 --artifact metrics1.json metrics2.json
+```
+
+With job parameters
+```
+jdss jobs --url http://jenkins/my-job/ --history 10 --artifact metrics.json --parameters parameter1 parameter2
+```
+
+With Jenkins basic authentication:
+```
+jdss jobs --url http://jenkins/my-job/ --history 10 --artifact metrics.json --user user.name --password p4ssword1
+```
+
 ## Releasing
 ```
 ./release.sh [current-version] [new-version]
