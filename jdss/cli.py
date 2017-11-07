@@ -76,10 +76,20 @@ def jobs(args):
             if summary['result'].upper() != 'SUCCESS':
                 print('INFO: Skipping build {}, because it did not succeed'.format(build_number))
                 continue
-            for parameter in args.parameters:
-                if len(summary['actions']) > 0 and 'parameters' in summary['actions'][0] and parameter in [p['name'] for p in summary['actions'][0]['parameters']]:
-                    artifact_keys.add(parameter)
-                    artifact_values[parameter] = [p['value'] for p in summary['actions'][0]['parameters'] if p['name'] == parameter][0]
+
+            if len(summary['actions']) > 0:
+                action_index = 0
+                action_found = False
+                for action in summary['actions']:
+                    if 'parameters' in action['_class'].lower():
+                        action_found = True
+                        break
+                    action_index += 1
+                if action_found and 'parameters' in summary['actions'][action_index]:
+                    for parameter in args.parameters:
+                        if parameter in [p['name'] for p in summary['actions'][action_index]['parameters']]:
+                            artifact_keys.add(parameter)
+                            artifact_values[parameter] = [p['value'] for p in summary['actions'][action_index]['parameters'] if p['name'] == parameter][0]
 
             for artifact in args.artifact:
                 url = '{}/{}/artifact/{}'.format(args.url, build_number, artifact)
