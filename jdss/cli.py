@@ -1,6 +1,7 @@
 import argparse
 import os
 import json
+import csv
 import glob
 import requests
 from jdss import SummaryReport
@@ -37,6 +38,15 @@ def job(args):
                         file_name,
                         '<![CDATA[<img src="data:image/{};base64,{}"/>]]>'.format(file_ext[1:], image_data)
                     )
+                elif file_ext == '.csv':
+                    with open(file, 'r') as csvfile:
+                        reader = csv.reader(csvfile)
+
+                    table = tab.add_table()
+                    for row in reader:
+                        r = table.add_row()
+                        for element in row:
+                            r.add_cell(element)
     report.write(args.file, args.output)
 
 
