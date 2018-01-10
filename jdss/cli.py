@@ -41,12 +41,11 @@ def job(args):
                 elif file_ext == '.csv':
                     with open(file, 'r') as csvfile:
                         reader = csv.reader(csvfile)
-
-                    table = tab.add_table()
-                    for row in reader:
-                        r = table.add_row()
-                        for element in row:
-                            r.add_cell(element)
+                        table = tab.add_table()
+                        for row in reader:
+                            r = table.add_row()
+                            for element in row:
+                                r.add_cell(element)
     report.write(args.file, args.output)
 
 
